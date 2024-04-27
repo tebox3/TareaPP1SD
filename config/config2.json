@@ -1,0 +1,7 @@
+{
+    "host": "127.0.0.1", 
+    "port": 5002,
+    "server_name":"slave2",
+    "tipo":"video",
+    "dbConnConfig":{"user":"root", "pass":"root","host":"127.0.0.1", "dbname":"documentosd"}
+}
