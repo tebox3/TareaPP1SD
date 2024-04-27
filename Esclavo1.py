@@ -55,7 +55,7 @@ def buscar_tipo():
         try:
             with conn.cursor() as cursor:
                 print("BBB")
-                cursor.execute("SELECT * FROM %s",configuracion["tipo"])
+                cursor.execute("SELECT * FROM {}".format(configuracion["tipo"]),)
                 resultados = cursor.fetchall()
                 print("BBB")
                 print(resultados)
