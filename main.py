@@ -1,5 +1,8 @@
 from flask import Flask, request, jsonify
 import requests
+import asyncio
+import aiohttp
+import time
 app = Flask(__name__)
 
 urls_esclavos = [
@@ -16,6 +19,34 @@ urls_esclavos_tipo = [
     "http://localhost:5004/buscar_tipo"
     ]
 
+""" for url_esclavo in urls_esclavos:
+                respuesta = requests.get(url_esclavo, params=parametros, timeout=5)
+                print("AAA")
+                if respuesta.status_code == 200:
+                    if respuesta.json()!={'error': 'No se encontraron resultados'}:
+                        print(respuesta.json())
+                        respuestas.append(respuesta.json())
+                else:
+                    print("Error en la solicitud:", respuesta.status_code) """
+
+def obtener_tasks(session,parametros):
+    tasks = []
+    for url in urls_esclavos:
+        tasks.append(session.get(url, params=parametros, timeout=5))
+    return tasks
+
+async def obtener_simbolos(parametros):
+    results = []
+    async with aiohttp.ClientSession() as session:
+        tasks = obtener_tasks(session,parametros)
+        print(tasks)
+        responses = await asyncio.gather(*tasks)
+        for response in responses:
+            json_data = await response.json()
+            if json_data:  # Verificar si la respuesta contiene datos
+                results.append(json_data)
+    return results
+
 @app.route('/query', methods=['GET'])
 def query():
     titulo = request.args.get('titulo')
@@ -25,19 +56,14 @@ def query():
     respuestas = []
     print("El valor del parametro es: ",valor)
     print("El titulo del main: ",titulo)
+    start = time.time()
     if(valor=='titulo'):
         parametros = {'titulo': titulo}
-        print("AAA")
         try:
-            for url_esclavo in urls_esclavos:
-                respuesta = requests.get(url_esclavo, params=parametros, timeout=5)
-                print("AAA")
-                if respuesta.status_code == 200:
-                    if respuesta.json()!={'error': 'No se encontraron resultados'}:
-                        print(respuesta.json())
-                        respuestas.append(respuesta.json())
-                else:
-                    print("Error en la solicitud:", respuesta.status_code)
+            respuestas = asyncio.run(obtener_simbolos(parametros))
+            end = time.time()
+            tiempo = end - start
+            print("Tiempo de tarea: ",tiempo," segundos")
             if respuestas == []:
                 return jsonify("No se encontraron resultados")
             return respuestas

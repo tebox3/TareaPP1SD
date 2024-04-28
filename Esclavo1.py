@@ -16,17 +16,22 @@ def cargar_configuracion():
     return configuracion
 
 def buscar_nombre(parte_nombre):
+    conn = pymysql.connect(host=configuracion["dbConnConfig"]["host"], user=configuracion["dbConnConfig"]["user"], password=configuracion["dbConnConfig"]["pass"], db=configuracion["dbConnConfig"]["dbname"])
     try:
         with conn.cursor() as cursor:
             print("AQUI VIENEEEEEE")
             print(configuracion["tipo"])
             print(("SELECT Titulo FROM %s WHERE Titulo LIKE %s", (configuracion["tipo"],'%{}%'.format(parte_nombre),)))
+            print("OOOOOOOOOOOOO")
             cursor.execute("SELECT Titulo FROM {} WHERE Titulo LIKE %s".format(configuracion["tipo"]), ('%{}%'.format(parte_nombre),))
+            print("OOOOOOOOOOOOO")
             resultados = cursor.fetchall()
+            print("OOOOOOOOOOOOO")
+            print("SE LLEGO AL FINAL AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             return resultados
     except Exception as e:
         print("Error al buscar dato en esclavo1", e)
-        return None
+        return jsonify("ERROR")
     finally:
         conn.close()
     
@@ -41,7 +46,7 @@ def buscar_titulo():
             return jsonify(resultados)
         else:
             print("No se encontraron resultados")
-            return jsonify({'error': 'No se encontraron resultados'})
+            return jsonify({})
     else:
         return jsonify({'error': 'Se requiere el parámetro "titulo" en la solicitud'})
 
